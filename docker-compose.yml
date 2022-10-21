@@ -1,0 +1,103 @@
+services:
+  ### balancer  ################################################
+  balancer:
+    build:
+      context: ./context/balancer
+    ports:
+      - "8080:80"
+    volumes:
+      - "${PWD}/geoip/GeoLite2-Country.mmdb:/etc/GeoLite2-Country.mmdb"
+      - "${PWD}/config/balancer/geoip.conf:/etc/nginx/conf.d/vhosts/geoip.conf"
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.100
+
+  ### node-1 uk ################################################
+  node-1:
+    build:
+      context: ./context/nginx
+    ports:
+      - "8001:8000"
+    volumes:
+      - "${PWD}/config/node/node-1.conf:/etc/nginx/conf.d/node-1.conf"
+      - ./src/node-1/:/var/www
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.21
+
+  ### node-2 us ################################################
+  node-2:
+    build:
+      context: ./context/nginx
+    ports:
+      - "8002:8000"
+    volumes:
+      - "${PWD}/config/node/node-2.conf:/etc/nginx/conf.d/node-2.conf"
+      - ./src/node-2/:/var/www
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.22
+
+  ### node-3 us ################################################
+  node-3:
+    build:
+      context: ./context/nginx
+    ports:
+      - "8003:8000"
+    volumes:
+      - "${PWD}/config/node/node-3.conf:/etc/nginx/conf.d/node-3.conf"
+      - ./src/node-3/:/var/www
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.23
+
+  ### node-4 other ################################################
+  node-4:
+    build:
+      context: ./context/nginx
+    ports:
+      - "8004:8000"
+    volumes:
+      - "${PWD}/config/node/node-4.conf:/etc/nginx/conf.d/node-4.conf"
+      - ./src/node-4/:/var/www
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.24
+        
+  ### app-us ################################################
+  app-us:
+    build:
+      context: ./context/nginx
+    ports:
+      - "8000"
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.70
+
+  ### app-uk ################################################
+  app-uk:
+    build:
+      context: ./context/nginx
+    ports:
+      - "8000"
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.80
+
+  ### app-all ################################################
+  app-all:
+    build:
+      context: ./context/nginx
+    ports:
+      - "8000"
+    networks:
+      geoip:
+        ipv4_address: 172.18.236.90
+      
+networks:
+  geoip:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.236.0/24
+          gateway: 172.18.236.1
